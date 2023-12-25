@@ -1,11 +1,12 @@
 import React from 'react';
 import VolunteerForm from './components/VolunteerForm'
+import AudioRecorder from './audioRecorder'; 
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <VolunteerForm />
+      <AudioRecorder />
     </div>
   );
 }
