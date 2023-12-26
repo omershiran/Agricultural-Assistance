@@ -13,7 +13,7 @@ def initialize_db(db_name='iron_farm.db'):
                 user_id INTEGER PRIMARY KEY,
                 firstname TEXT,
                 LastName TEXT,
-                email TEXT,
+                email TEXT UNIQUE,
                 password TEXT,
                 phone_number TEXT
             )
@@ -26,6 +26,7 @@ def initialize_db(db_name='iron_farm.db'):
                 BusinessID INTEGER PRIMARY KEY,
                 business_name TEXT,
                 region TEXT,
+                city TEXT,
                 FOREIGN KEY(user_id) REFERENCES users(user_id)
             )
         ''')
@@ -34,7 +35,6 @@ def initialize_db(db_name='iron_farm.db'):
             CREATE TABLE IF NOT EXISTS VolunteerActivity (
                 ActivityID INTEGER PRIMARY KEY,
                 BusinessID INTEGER,
-                city TEXT,
                 StartTime TEXT NOT NULL,
                 EndTime TEXT NOT NULL,
                 IsPhysical INTEGER NOT NULL,
@@ -60,6 +60,8 @@ def initialize_db(db_name='iron_farm.db'):
     cur.execute('CREATE INDEX IF NOT EXISTS idx_type_of_volunteer ON VolunteerActivity(type_volunteer);')
     cur.execute('CREATE INDEX IF NOT EXISTS idx_start_time ON VolunteerActivity(StartTime);')
     cur.execute('CREATE INDEX IF NOT EXISTS idx_locate ON VolunteerActivity(city);')
+    cur.execute('CREATE INDEX IF NOT EXISTS idx_email_user ON users(email);')
+
     # Create a trigger for after an insert on user_to_volunteer
     cur.execute('''
             CREATE TRIGGER IF NOT EXISTS AfterUserVolunteerActivityInsert
