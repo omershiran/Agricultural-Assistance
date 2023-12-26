@@ -2,7 +2,8 @@ import sqlite3
 import unittest
 import os
 
-from server.operators.db import initialize_db  # Ensure this path is correct
+# Correct the path according to your project structure.
+from server.operators.db import initialize_db
 
 
 class TestDatabaseInitialization(unittest.TestCase):
@@ -38,20 +39,18 @@ class TestDatabaseInitialization(unittest.TestCase):
         conn = sqlite3.connect(self.test_db)
         cur = conn.cursor()
 
-        # Assuming there is already some data in the VolunteerActivity and users tables
-        # Insert a test volunteer activity and a user
+        # Insert a test user, business, and volunteer activity
         cur.execute("INSERT INTO users (firstname, LastName, email, password, phone_number) VALUES (?, ?, ?, ?, ?)",
                     ('Test', 'User', 'test@example.com', 'pass123', '1234567890'))
         user_id = cur.lastrowid  # Get the ID of the inserted user
 
-        cur.execute("INSERT INTO business (user_id, business_name, region) VALUES (?, ?, ?)",
-                    (user_id, 'Test Business', 'Test Region'))
+        cur.execute("INSERT INTO business (user_id, business_name, city) VALUES (?, ?, ?)",
+                    (user_id, 'Test Business', 'Test City'))
         business_id = cur.lastrowid  # Get the ID of the inserted business
 
         cur.execute(
-            "INSERT INTO VolunteerActivity (BusinessID, city, StartTime, EndTime, IsPhysical, NumberOfVolunteers, VolunteersNeeded, type_volunteer, ActivityDescription) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (business_id, 'Test City', '2021-01-01 09:00:00', '2021-01-01 12:00:00', 1, 10, 10, 'Test Type',
-             'Test Description'))
+            "INSERT INTO VolunteerActivity (BusinessID, Date, IsPhysical, NumberOfVolunteers, VolunteersNeeded, type_volunteer, ActivityDescription) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (business_id, '2021-01-01', 1, 10, 10, 'Test Type', 'Test Description'))
         activity_id = cur.lastrowid  # Get the ID of the inserted activity
 
         # Insert a new user_to_volunteer record to trigger the decrement of VolunteersNeeded
@@ -73,8 +72,9 @@ class TestDatabaseInitialization(unittest.TestCase):
         # Dictionary of expected indexes and the table they should be on
         expected_indexes = {
             'idx_type_of_volunteer': 'VolunteerActivity',
-            'idx_start_time': 'VolunteerActivity',
-            'idx_locate': 'VolunteerActivity'
+            'idx_date': 'VolunteerActivity',
+            'idx_locate': 'business',
+            'idx_email_user': 'users'
         }
 
         for index_name, table_name in expected_indexes.items():
@@ -83,7 +83,7 @@ class TestDatabaseInitialization(unittest.TestCase):
                 indexes = cur.fetchall()
 
                 # Check if the index is in the list of indexes for the table
-                found = any(index_name in row for row in indexes)
+                found = any(index_name in row[1] for row in indexes)
                 self.assertTrue(found, f"Index {index_name} on table {table_name} does not exist.")
 
         conn.close()
