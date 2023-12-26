@@ -1,10 +1,11 @@
 import sqlite3
 import json
 import random
+from datetime import datetime
 
 
 def initialize_db(db_name='iron_farm.db'):
-    conn = sqlite3.connect(db_name)
+    conn = get_db_connection(db_name)
     cur = conn.cursor()
 
     # Create users table
@@ -78,7 +79,7 @@ def initialize_db(db_name='iron_farm.db'):
 
 
 def add_user(first_name, last_name, email, password, phone_number, db_name='iron_farm.db'):
-    conn = sqlite3.connect(db_name)
+    conn = get_db_connection(db_name)
     cur = conn.cursor()
     try:
         # Connect to the SQLite database
@@ -112,7 +113,7 @@ def add_user(first_name, last_name, email, password, phone_number, db_name='iron
 
 
 def get_user(email, password, db_name='iron_farm.db'):
-    conn = sqlite3.connect(db_name)
+    conn = get_db_connection(db_name)
     cur = conn.cursor()
     try:
 
@@ -142,8 +143,10 @@ def get_user(email, password, db_name='iron_farm.db'):
         # Handle any SQLite errors
         print(f"An error occurred: {e}")
         return False, None, None  # Return False if there's an error
-def create_business(business_name,city,user_id, db_name='iron_farm.db'):
-    conn = sqlite3.connect(db_name)
+
+
+def create_business(business_name, city, user_id, db_name='iron_farm.db'):
+    conn = get_db_connection(db_name)
     cur = conn.cursor()
     try:
         cur.execute('''
@@ -171,3 +174,182 @@ def create_business(business_name,city,user_id, db_name='iron_farm.db'):
         print(f"An error occurred: {e}")
         conn.close()
         return None, False
+
+
+def create_activity(BusinessID, date, is_physical, NumberOfVolunteers, type_volunteer, ActivityDescription,
+                    db_name='iron_farm.db'):
+    conn = get_db_connection(db_name)
+    cur = conn.cursor()
+    try:
+
+        # Insert a new record into the VolunteerActivity table
+        cur.execute('''
+            INSERT INTO VolunteerActivity (BusinessID, Date, IsPhysical, NumberOfVolunteers,VolunteersNeeded, type_volunteer, ActivityDescription)
+            VALUES (?, ?, ?, ?, ?, ?,?)
+            ''', (
+            BusinessID, date, is_physical, NumberOfVolunteers, NumberOfVolunteers, type_volunteer, ActivityDescription))
+
+        # Commit the changes
+        conn.commit()
+
+        # Close the connection
+        conn.close()
+
+        return True  # Return True for success
+
+    except sqlite3.IntegrityError as e:
+        # Handle any database constraints violation (e.g., foreign key constraint)
+        print(f"Integrity Error: {e}")
+        conn.close()
+        return False  # Return False for failure
+
+    except sqlite3.Error as e:
+        # Handle any SQLite errors
+        print(f"An error occurred: {e}")
+        conn.close()
+        return False  # Return False for failure
+
+
+def get_db_connection(db_name):
+    conn = sqlite3.connect(db_name)
+    conn.execute("PRAGMA foreign_keys = ON")  # Enable FK enforcement
+    return conn
+
+
+def get_activity(city=None, start_date=None, end_date=None, is_physical=None, type_volunteer=None,
+                 db_name='iron_farm.db'):
+    # Establish a connection to the database
+    conn = get_db_connection(db_name)
+    cur = conn.cursor()
+    today = datetime.now().strftime('%Y-%m-%d')
+    # Base SQL query
+    sql = """
+    SELECT v.ActivityID, v.BusinessID, v.Date, v.IsPhysical, v.type_volunteer, v.ActivityDescription,v.VolunteersNeeded,b.city 
+    FROM VolunteerActivity v 
+    inner join Business b 
+    on v.BusinessID=b.BusinessID
+    WHERE 1=1 AND v.date>?
+    """
+
+    # Parameters to include in the query
+    params = [today]
+    """
+    # Add conditions to the SQL query based on function arguments
+    if city:
+        sql += " AND EXISTS (SELECT 1 FROM business WHERE business.BusinessID = VolunteerActivity.BusinessID AND business.city = ?)"
+        params.append(city)
+    if start_date:
+        sql += " AND Date >= ?"
+        params.append(start_date)
+    else:
+        # Default to today's date if no start_date is provided
+        sql += " AND Date >= ?"
+        params.append(datetime.now().strftime('%Y-%m-%d'))
+    if end_date:
+        sql += " AND Date <= ?"
+        params.append(end_date)
+    if is_physical is not None:
+        sql += " AND IsPhysical = ?"
+        params.append(is_physical)
+    if type_volunteer:
+        sql += " AND type_volunteer = ?"
+        params.append(type_volunteer)
+
+    # Execute the SQL query with the parameters
+    """
+    cur.execute(sql, params)
+
+    # Fetch all the results
+    results = cur.fetchall()
+
+    # Close the database connection
+    conn.close()
+
+    # Return the results
+    return results
+
+
+def make_match(user_id, activity_id, db_name='iron_farm.db'):
+    conn = get_db_connection(db_name)
+    cur = conn.cursor()
+
+    try:
+        # Get the date of the activity user wants to register for
+        cur.execute("SELECT Date FROM VolunteerActivity WHERE ActivityID = ?", (activity_id,))
+        activity_date = cur.fetchone()
+        if not activity_date:
+            print("No such activity found.")
+            return False
+
+        # Check if the user is already registered for an activity on the same date
+        cur.execute("""
+        SELECT 1 FROM user_to_volunteer uv
+        JOIN VolunteerActivity va ON uv.ActivityID = va.ActivityID
+        WHERE uv.UserID = ? AND va.Date = ?
+        """, (user_id, activity_date[0]))
+
+        if cur.fetchone():
+            # The user is already registered for an activity on this date
+            print("User is already registered for an activity on this date.")
+            return False
+
+        # Insert the user and activity into the user_to_volunteer table
+        cur.execute("INSERT INTO user_to_volunteer (UserID, ActivityID) VALUES (?, ?)", (user_id, activity_id))
+        conn.commit()
+
+        return True
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return False
+
+    finally:
+        # Close the connection to the database
+        conn.close()
+
+
+# function to miletzky
+def is_business_exist(user_id, business_name, db_name='iron_farm.db'):
+    conn = get_db_connection(db_name)
+    cur = conn.cursor()
+
+    try:
+        # Prepare SQL to check if a business exists with the given user_id and business_name
+        cur.execute("SELECT 1 FROM business WHERE user_id = ? AND business_name = ?", (user_id, business_name))
+
+        # Fetch one result
+        result = cur.fetchone()
+
+        # Return True if a business exists, False otherwise
+        return result is not None
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return False
+
+    finally:
+        # Close the database connection
+        conn.close()
+
+
+def check_mail(mail, db_name='iron_farm.db'):
+    conn = get_db_connection(db_name)
+    cur = conn.cursor()
+
+    try:
+        # Prepare SQL to check if an email exists in the users table
+        cur.execute("SELECT 1 FROM users WHERE email = ?", (mail,))
+
+        # Fetch one result
+        result = cur.fetchone()
+
+        # Return True if an email exists, False otherwise
+        return result is not None
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return False
+
+    finally:
+        # Close the database connection
+        conn.close()
