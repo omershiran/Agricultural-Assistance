@@ -34,8 +34,7 @@ def initialize_db(db_name='iron_farm.db'):
             CREATE TABLE IF NOT EXISTS VolunteerActivity (
                 ActivityID INTEGER PRIMARY KEY,
                 BusinessID INTEGER,
-                StartTime TEXT NOT NULL,
-                EndTime TEXT NOT NULL,
+                Date TEXT NOT NULL,
                 IsPhysical INTEGER NOT NULL,
                 NumberOfVolunteers INTEGER NOT NULL,
                 VolunteersNeeded INTEGER NOT NULL,
@@ -57,8 +56,8 @@ def initialize_db(db_name='iron_farm.db'):
 
     # Create indexes for the VolunteerActivity table
     cur.execute('CREATE INDEX IF NOT EXISTS idx_type_of_volunteer ON VolunteerActivity(type_volunteer);')
-    cur.execute('CREATE INDEX IF NOT EXISTS idx_start_time ON VolunteerActivity(StartTime);')
-    cur.execute('CREATE INDEX IF NOT EXISTS idx_locate ON VolunteerActivity(city);')
+    cur.execute('CREATE INDEX IF NOT EXISTS idx_date ON VolunteerActivity(date);')
+    cur.execute('CREATE INDEX IF NOT EXISTS idx_locate ON business(city);')
     cur.execute('CREATE INDEX IF NOT EXISTS idx_email_user ON users(email);')
 
     # Create a trigger for after an insert on user_to_volunteer
