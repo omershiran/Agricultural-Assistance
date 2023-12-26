@@ -22,7 +22,7 @@ def initialize_db(db_name='iron_farm.db'):
     # Create business table
     cur.execute('''
             CREATE TABLE IF NOT EXISTS business (
-                user_id INTEGER,
+                user_id INTEGER UNIQUE,
                 BusinessID INTEGER PRIMARY KEY,
                 business_name TEXT,
                 city TEXT,
@@ -142,3 +142,32 @@ def get_user(email, password, db_name='iron_farm.db'):
         # Handle any SQLite errors
         print(f"An error occurred: {e}")
         return False, None, None  # Return False if there's an error
+def create_business(business_name,city,user_id, db_name='iron_farm.db'):
+    conn = sqlite3.connect(db_name)
+    cur = conn.cursor()
+    try:
+        cur.execute('''
+                INSERT INTO business (business_name, city, user_id)
+                VALUES (?, ?, ?)
+                ''', (business_name, city, user_id))
+
+        # Commit the changes and retrieve the new business_id
+        conn.commit()
+        business_id = cur.lastrowid
+
+        # Close the connection
+        conn.close()
+
+        return business_id, True  # Return the new business_id and True for success
+
+    except sqlite3.IntegrityError as e:
+        # Handle any database constraints violation (e.g., unique business name, if applicable)
+        print(f"Integrity Error: {e}")
+        conn.close()
+        return None, False  # Return None for business_id and False for failure
+
+    except sqlite3.Error as e:
+        # Handle any SQLite errors
+        print(f"An error occurred: {e}")
+        conn.close()
+        return None, False
