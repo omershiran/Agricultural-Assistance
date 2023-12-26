@@ -25,7 +25,6 @@ def initialize_db(db_name='iron_farm.db'):
                 user_id INTEGER,
                 BusinessID INTEGER PRIMARY KEY,
                 business_name TEXT,
-                region TEXT,
                 city TEXT,
                 FOREIGN KEY(user_id) REFERENCES users(user_id)
             )
