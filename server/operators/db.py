@@ -75,12 +75,13 @@ def initialize_db(db_name='iron_farm.db'):
     # Commit the changes and close the connection
     conn.commit()
     conn.close()
-def add_user(first_name,last_name,email,password,phone_number,db_name='iron_farm.db'):
+
+
+def add_user(first_name, last_name, email, password, phone_number, db_name='iron_farm.db'):
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
     try:
         # Connect to the SQLite database
-
 
         # Insert a new record into the users table
         cur.execute('''
@@ -108,3 +109,36 @@ def add_user(first_name,last_name,email,password,phone_number,db_name='iron_farm
         print(f"An error occurred: {e}")
         conn.close()
         return False, None
+
+
+def get_user(email, password, db_name='iron_farm.db'):
+    conn = sqlite3.connect(db_name)
+    cur = conn.cursor()
+    try:
+
+        # Query to find the user with the given email and password
+        cur.execute('''
+            SELECT users.user_id, business.BusinessID FROM users
+            LEFT JOIN business ON users.user_id = business.user_id
+            WHERE users.email = ? AND users.password = ?
+            ''', (email, password))
+
+        # Fetch one result
+        result = cur.fetchone()
+
+        # Close the connection
+        conn.close()
+
+        # Check if a result was found
+        if result:
+            user_id, business_id = result
+            # Return True with the user_id and business_id (business_id may be None if not associated)
+            return True, user_id, business_id
+        else:
+            return False, None, None  # Return False if no user was found
+
+    except sqlite3.Error as e:
+        conn.close()
+        # Handle any SQLite errors
+        print(f"An error occurred: {e}")
+        return False, None, None  # Return False if there's an error
