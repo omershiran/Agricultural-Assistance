@@ -12,7 +12,7 @@
 # def registration():
 #     pass
 from flask import Flask, request, jsonify
-from DBridge import add_user, get_user
+from operators.db import add_user, check_mail
 
 app = Flask(__name__)
 
@@ -24,9 +24,9 @@ def registration_api():
     req_data = request.get_json()
     mail = req_data.get('email')
 
-    response = get_user(mail)
+    response = check_mail(mail)
 
-    if len(response) == 0:
+    if response == False:
         # Successful register
         try:
             add_user(req_data)

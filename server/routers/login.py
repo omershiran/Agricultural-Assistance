@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from operators.db import get_user
 
 app = Flask(__name__)
 
@@ -13,7 +14,7 @@ def login():
     if not username or not password:
         return jsonify({'error': 'Username and password are required'}), 400
 
-    response = usernamePasswordMatch(username, password)
+    response = get_user(username, password)
 
     if response == 0:
         # Successful login

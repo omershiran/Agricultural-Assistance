@@ -36,7 +36,7 @@ const VolunteerForm = () => {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
         },
-        body: JSON.stringify({"yehuda", "1234", name, "06543", "qhdhggv"}),
+        body: JSON.stringify({username, password, name, phone, email}),
     })
         .then((response) => response.json())
         .then((data) => {

@@ -26,16 +26,15 @@ def add_user(user_data):
     cursor.close()
 
 
-def get_user(mail):
+def get_user(mail,password):
     try:
         connection = mysql.connector.connect(**config)
         if connection.is_connected():
             cursor = connection.cursor(dictionary=True)
             sql = f"SELECT * FROM users WHERE mail='{mail}'"
             cursor.execute(sql)
-            user = cursor.fetchall()
-            print(user)  # Process the retrieved user data
-            return user
+            userId = cursor.fetchall()
+            return userId
     except Error as e:
         print("Error fetching users:", e)
     finally:
