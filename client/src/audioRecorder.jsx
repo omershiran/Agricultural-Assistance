@@ -27,7 +27,7 @@ function AudioRecorder() {
         analyser.getByteFrequencyData(dataArray);
         let sum = dataArray.reduce((a, b) => a + b, 0);
         let average = sum / dataArray.length;
-      // console.log('average:  ',average);
+      console.log('average:  ',average);
         // זיהוי שתיקה בהתבסס על עוצמה ממוצעת נמוכה
         if (average < 5) { // SILENCE_THRESHOLD יש להתאים
           silenceCounter++;
@@ -51,9 +51,26 @@ function AudioRecorder() {
       animationFrameId = requestAnimationFrame(checkSilence);
   
       // התחלת הקלטת האודיו
-      mediaRecorder.ondataavailable = (e) => {
-        // טיפול בנתוני ההקלטה, לדוגמה שמירה או השמעה
+      mediaRecorder.ondataavailable = async (e) => {
+        const audioBlob = new Blob([e.data], { type: 'audio/wav' });
+        const formData = new FormData();
+        formData.append('audioFile', audioBlob, Date.now()+'.wav');
+      
+        try {
+          const response = await fetch('http://192.168.1.195:8000/audio_manager/uploade', {
+            method: 'POST',
+            body: formData,
+          });
+          if (response.ok) {
+            console.log('Recording uploaded');
+          } else {
+            console.error('Upload failed');
+          }
+        } catch (error) {
+          console.error('Error in upload: ', error);
+        }
       };
+      
   
       // כאשר ההקלטה מסתיימת
       mediaRecorder.onstop = () => {
