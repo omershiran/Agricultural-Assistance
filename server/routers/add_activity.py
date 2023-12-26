@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 import json
 
-from server.operators.db import create_activity
 
-# import sys
-# sys.path.append('../')
+
+import sys
+sys.path.append('../')
+from operators.db import create_activity
+
 
 add_activity_api = Blueprint('add_activity_api', __name__)
 

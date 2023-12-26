@@ -19,6 +19,40 @@ const VolunteerForm = () => {
         console.log(formData);
     };
 
+    let register = (event) => {
+        event.preventDefault();
+
+        setFormFilled(false);
+        setUsernameTakenError(false);
+
+        if (password !== passwordRepeat) {
+            setPasswordsError(true);
+            return;
+        }
+
+    fetch(`http://localhost:5000/registraion`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({username, password, name, phone, email}),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            // Handle the response data
+            if (data.message === "Username taken") setUsernameTakenError(true);
+
+            if (data.message !== "Register successful") return;
+
+            setTimeout(() => setFormFilled(true), 1000);
+        })
+        .catch((error) => {
+            // Handle any errors
+            console.error(error);
+        });
+};
+
     return (
         <div className="volunteer-form-container">
             <form className="volunteer-form" onSubmit={handleSubmit}>
@@ -51,7 +85,7 @@ const VolunteerForm = () => {
                         onChange={handleChange}
                     />
                 </div>
-                <button type="submit">Submit</button>
+                <button type="submit" onClick={register}>Submit</button>
             </form>
         </div>
     );
