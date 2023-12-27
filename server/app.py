@@ -11,6 +11,7 @@ from server.routers.Volunteer_matchmaking import matching_api
 from server.routers.add_activity import add_activity_api
 from server.routers.biusiness import business_api
 from server.routers.get_activity import activities_api
+from server.routers.login import auth_api
 
 app = Flask(__name__)
 CORS(app, resources={r'/*': {'origins': CORS_ORIGINS}})
@@ -19,6 +20,7 @@ app.register_blueprint(user_api)
 app.register_blueprint(activities_api)
 app.register_blueprint(matching_api)
 app.register_blueprint(business_api)
+app.register_blueprint(auth_api)
 
 initialize_db()
 insert_random_activities_no_faker_fixed_v2()
