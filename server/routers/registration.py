@@ -1,9 +1,10 @@
-from flask import Blueprint, request, jsonify
 import sqlite3
-# Import a password hashing library - ensure to install it first
-from werkzeug.security import generate_password_hash
+import sys
 
-from server.operators.db import get_db_connection, add_user
+from flask import Blueprint, request, jsonify
+
+sys.path.append('../')
+from operators.db import add_user
 
 
 user_api = Blueprint('user_api', __name__)

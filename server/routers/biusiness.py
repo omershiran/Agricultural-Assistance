@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 # Assuming get_db_connection is defined somewhere in your application
-from server.operators.db import get_db_connection, create_business
+from server.operators.db import create_business
 
 # Blueprint setup
 business_api = Blueprint('business_api', __name__)
