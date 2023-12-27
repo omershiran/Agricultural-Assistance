@@ -6,6 +6,11 @@ from CONSTS import HOST,PORT,CORS_ORIGINS
 from operators.db import initialize_db
   
 from routers.registration import registration_api
+from routers.registration import registration_api
+from routers.registration import registration_api
+from routers.registration import registration_api
+from routers.registration import registration_api
+from routers.registration import registration_api
 
 
 app = Flask(__name__)

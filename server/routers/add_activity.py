@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 import json
 
-from operators.db import create_activity
+from server.operators.db import create_activity
 
 # import sys
 # sys.path.append('../')
