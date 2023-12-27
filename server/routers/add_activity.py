@@ -12,7 +12,7 @@ add_activity_api = Blueprint('add_activity_api', __name__)
 def add_activity():
     # Extract data from the request
     data = request.get_json()
-    BusinessID = data.get('BusinessID')
+    BusinessID = data.get('business_id')
     date = data.get('date')
     is_physical = data.get('is_physical')
     NumberOfVolunteers = data.get('NumberOfVolunteers')

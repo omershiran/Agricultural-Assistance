@@ -1,10 +1,13 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request,jsonify, Blueprint
 from operators.db import is_business_exist, create_business
 
+import json
+import operators.db as db
 
 app = Flask(__name__)
+business_api = Blueprint('business_api', __name__)
 
-@app.route('/register_business', methods=['POST'])
+@business_api.route('/register_business', methods=['POST'])
 def register_business():
     req_data = request.get_json()
     business_name = req_data.get('business_name')

@@ -18,7 +18,7 @@ def get_activities():
         is_physical = True if is_physical.lower() == 'true' else False
 
     # Call the get_activity function with the parameters from the request
-    activities = get_activity(city, start_date, end_date, is_physical, type_volunteer)
+    activities = get_activity()
 
     # Convert the activities to a list of dictionaries (if not already) to jsonify
     activities_list = [dict(activity) for activity in activities]
